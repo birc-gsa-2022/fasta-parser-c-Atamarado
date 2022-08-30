@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Reads a file and puts in a buffer, in an allocated memory space
 // https://stackoverflow.com/questions/3747086/reading-the-whole-text-file-into-a-char-array-in-c
@@ -42,7 +43,60 @@ int main(int argc, char const *argv[])
 
     char *content = readFile(fasta_fname);
 
-    printf("%s",content);
+    //Parsing into DNA chains
+    int pos = 0;
+    const int length = strlen(content);
+
+    // Find every chain
+    while(pos<length){
+        //First we have to find '>'
+        char c = content[pos];
+        while(pos < length && c!='>'){
+            pos++;
+            c = content[pos];
+        }
+
+        // Skip spaces
+        while(pos < length && c!=' '){
+            pos++;
+            c = content[pos];
+        }
+
+        // Find the name
+        int nameBegin = pos;
+        while(pos<length && c!=' ' && c!='\n'){
+            pos++;
+            c = content[pos];
+        }
+
+        char *name = calloc(pos-nameBegin, sizeof(char));
+        memcpy(name, &content[nameBegin], pos);
+
+        // Find the chain
+        int nChain = 0;
+        int chainBegin = pos;
+        while(pos<length && c!='>'){
+            if(c!=' ' && c!='\n'){
+                nChain++;
+            }
+
+            pos++;
+            c = content[pos];
+        }
+
+        printf("%s ",name);
+
+        for(int i=0; i<pos-chainBegin && nChain>0; i++){
+            char c = content[chainBegin+i];
+            if(c!=' ' && c!='\n'){
+                printf("%c", c);
+                nChain--;
+            }
+        }
+
+        printf("\n");
+    }
+
 
     return 1;
 }
